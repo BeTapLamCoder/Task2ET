@@ -56,7 +56,15 @@ const updateCartItem = async (req, res) => {
 
     item.quantity = quantity;
 
-    cart.total = cart.items.reduce((acc, item) => acc + item.quantity * item.shoe.price, 0);
+    let total = 0;
+    for (let item of cart.items) {
+      const shoe = await Shoe.findById(item.shoe);
+      if (shoe) {
+        total += item.quantity * shoe.price;
+      }
+    }
+
+    cart.total = total; 
 
     await cart.save();
     res.status(200).json({ message: 'Đã cập nhật giỏ hàng', cart });
@@ -64,6 +72,7 @@ const updateCartItem = async (req, res) => {
     res.status(500).json({ message: 'Có lỗi xảy ra', error: err });
   }
 };
+
 
 const checkout = async (req, res) => {
   try {
